@@ -1,0 +1,13 @@
+{
+  "name": "github-foundations-prep",
+  "version": "1.0.0",
+  "description": "Interactive GitHub Foundations (GH-900) Certification Exam Simulator & 100+ Question Bank",
+  "type": "module",
+  "scripts": {
+    "start": "npx -y serve . -l 3000",
+    "dev": "npx -y serve . -l 3000"
+  },
+  "keywords": ["github-foundations", "gh-900", "exam-prep", "certification", "datacamp", "microsoft-learn"],
+  "author": "",
+  "license": "MIT"
+}

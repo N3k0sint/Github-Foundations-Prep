@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Foundations (GH-900) Exam Simulator & Practice Exam</title>
+  <meta name="description" content="Interactive 100+ Question Exam Simulator for GitHub Foundations GH-900 Certification. Practice Exam based on Microsoft Learn, GitHub Docs, and DataCamp.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dark-theme">
+  <!-- App Container -->
+  <div id="app" class="app-container">
+    
+    <!-- Navigation / Header -->
+    <header class="app-header">
+      <div class="header-brand" id="btn-home" title="Return to Dashboard">
+        <div class="brand-icon">
+          <svg height="32" viewBox="0 0 16 16" width="32" fill="currentColor">
+            <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>GitHub Foundations <span class="badge-cert">GH-900</span></h1>
+          <p class="subtitle">Interactive Practice Assessment &amp; 115+ Question Bank</p>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <nav class="app-nav-tabs">
+          <button id="nav-tab-exam" class="nav-tab active">Practice Exam</button>
+          <button id="nav-tab-study" class="nav-tab">Study Hub</button>
+          <button id="nav-tab-lab" class="nav-tab">Terminal Lab</button>
+        </nav>
+      </div>
+
+      <div class="header-actions">
+        <div id="timer-display" class="timer-badge hidden">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span id="time-remaining">120:00</span>
+          <button id="btn-pause-timer" class="icon-btn-tiny" title="Pause/Resume Timer">⏸️</button>
+        </div>
+
+        <button id="btn-theme-toggle" class="btn-theme-toggle" title="Switch Theme (Dark / Light)" aria-label="Toggle dark/light theme">
+          <svg class="theme-icon-sun hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <span id="theme-label" class="theme-label">Dark</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- SCREEN 1: DASHBOARD / SETUP -->
+      <section id="screen-dashboard" class="screen active">
+        <div class="hero-banner">
+          <div class="hero-content">
+            <div class="hero-tag">Certified Exam Prep Engine</div>
+            <h2>Master GitHub Foundations with Confidence</h2>
+            <p>115+ high-yield questions covering Microsoft Learn GH-900, Official Microsoft Practice Assessment, DataCamp curriculum, and GitHub Docs.</p>
+            <div class="bank-stats-row">
+              <div class="stat-pill"><strong id="stat-total-q">115</strong> Questions in Bank</div>
+              <div class="stat-pill"><strong>6</strong> Official Domains</div>
+              <div class="stat-pill"><strong>3</strong> Question Formats (Single, Multi, T/F)</div>
+              <div class="stat-pill highlight"><strong>100%</strong> Dynamic Option Rotation</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode Selection Cards -->
+        <div class="modes-grid">
+          <!-- Official Simulation -->
+          <div class="mode-card featured" data-mode="official-exam">
+            <div class="mode-card-header">
+              <h3>Full Exam Simulation</h3>
+              <span class="mode-badge">Official Format</span>
+            </div>
+            <p>75 rotated questions from all domains, 120-minute timed test, 70% passing threshold, complete review at the end.</p>
+            <div class="card-meta">
+              <span>120 mins</span>
+              <span>•</span>
+              <span>75 Questions</span>
+            </div>
+            <button class="btn-primary btn-block btn-start-mode" data-mode="official-exam">Start Exam Simulation</button>
+          </div>
+
+          <!-- Standard Assessment -->
+          <div class="mode-card" data-mode="standard-assessment">
+            <div class="mode-card-header">
+              <h3>Microsoft Practice Style</h3>
+              <span class="mode-badge blue">Practice Assessment</span>
+            </div>
+            <p>Rotated 50-question set mirroring the Official Microsoft Learn Practice Assessment format.</p>
+            <div class="card-meta">
+              <span>Optional Timer</span>
+              <span>•</span>
+              <span>50 Questions</span>
+            </div>
+            <button class="btn-secondary btn-block btn-start-mode" data-mode="standard-assessment">Start 50 Assessment</button>
+          </div>
+
+          <!-- Quick Sprint -->
+          <div class="mode-card" data-mode="quick-sprint">
+            <div class="mode-card-header">
+              <h3>Quick Sprint (20 Questions)</h3>
+              <span class="mode-badge purple">Quick Drill</span>
+            </div>
+            <p>Fast practice session with instant explanation feedback after each question. Great for daily study.</p>
+            <div class="card-meta">
+              <span>Untimed</span>
+              <span>•</span>
+              <span>Instant Feedback</span>
+            </div>
+            <button class="btn-secondary btn-block btn-start-mode" data-mode="quick-sprint">Start Quick Sprint</button>
+          </div>
+
+          <!-- True / False Drill -->
+          <div class="mode-card" data-mode="true-false-drill">
+            <div class="mode-card-header">
+              <h3>True &amp; False Mastery</h3>
+              <span class="mode-badge amber">Rapid Fire</span>
+            </div>
+            <p>Focus specifically on high-yield True or False concept validation questions across all domains.</p>
+            <div class="card-meta">
+              <span>Concepts Check</span>
+              <span>•</span>
+              <span>All T/F Questions</span>
+            </div>
+            <button class="btn-secondary btn-block btn-start-mode" data-mode="true-false-drill">Start T/F Drill</button>
+          </div>
+
+          <!-- Domain Practice -->
+          <div class="mode-card" data-mode="domain-practice">
+            <div class="mode-card-header">
+              <h3>Domain Focus Study</h3>
+              <span class="mode-badge green">Targeted</span>
+            </div>
+            <p>Isolate specific knowledge domains like GitHub Actions, Security &amp; Compliance, or Repositories.</p>
+            <div class="card-meta">
+              <span>By Domain</span>
+              <span>•</span>
+              <span>Instant Explanations</span>
+            </div>
+            <button class="btn-secondary btn-block btn-start-mode" data-mode="domain-practice">Select Domain</button>
+          </div>
+
+          <!-- All Bank Practice -->
+          <div class="mode-card" data-mode="full-bank">
+            <div class="mode-card-header">
+              <h3>Complete Question Bank</h3>
+              <span class="mode-badge cyan">Exhaustive</span>
+            </div>
+            <p>Work through the complete question bank without limits to ensure 100% exam readiness.</p>
+            <div class="card-meta">
+              <span>Comprehensive</span>
+              <span>•</span>
+              <span>115+ Questions</span>
+            </div>
+            <button class="btn-secondary btn-block btn-start-mode" data-mode="full-bank">Practice All Questions</button>
+          </div>
+        </div>
+
+        <!-- Custom Session Configuration & Past History -->
+        <div class="dashboard-details-row">
+          <div class="settings-box">
+            <h3>Session Preferences</h3>
+            <div class="preference-item">
+              <div>
+                <strong>Instant Feedback Mode</strong>
+                <p>Reveal explanation and correct answer immediately upon answering</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="pref-instant-feedback">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="preference-item">
+              <div>
+                <strong>Shuffle Options Every Session</strong>
+                <p>Randomize answer choices (A, B, C, D) so you memorize concepts, not positions</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="pref-shuffle-options" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="preference-item">
+              <div>
+                <strong>Timed Mode</strong>
+                <p>Enable official countdown timer with remaining time warning</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="pref-timer-toggle" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="history-box">
+            <div class="history-header">
+              <h3>📊 Past Exam History</h3>
+              <button id="btn-clear-history" class="btn-link">Clear</button>
+            </div>
+            <div id="history-list" class="history-list">
+              <div class="history-empty">No exams completed yet. Take your first practice test to track performance!</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 2: DOMAIN SELECT MODAL/VIEW -->
+      <section id="screen-domain-picker" class="screen">
+        <div class="view-header">
+          <button class="btn-secondary btn-back" id="btn-back-to-dash">← Back to Dashboard</button>
+          <h2>Select Domain to Practice</h2>
+          <p>Choose a specific module to test your targeted knowledge</p>
+        </div>
+        <div id="domain-list-cards" class="domain-picker-grid">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- SCREEN 3: ACTIVE QUIZ / EXAM SCREEN -->
+      <section id="screen-quiz" class="screen">
+        <!-- Quiz Control Bar -->
+        <div class="quiz-topbar">
+          <div class="quiz-progress-meta">
+            <span class="q-counter">Question <strong id="current-q-index">1</strong> of <strong id="total-q-count">50</strong></span>
+            <div class="progress-bar-container">
+              <div id="quiz-progress-bar" class="progress-bar-fill" style="width: 2%;"></div>
+            </div>
+          </div>
+
+          <div class="quiz-controls">
+            <button id="btn-flag-question" class="btn-outline-flag" title="Mark for review">
+              <span class="flag-icon">🚩</span>
+              <span class="flag-label">Mark for Review</span>
+            </button>
+            <button id="btn-toggle-grid" class="btn-secondary btn-compact" title="Question Navigator">
+              <span>📋 Navigator</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Question View Card -->
+        <div class="question-container">
+          <div class="question-header">
+            <span id="question-domain-badge" class="badge-domain">Domain 1</span>
+            <span id="question-type-badge" class="badge-type">Select only one answer</span>
+            <span id="question-source-badge" class="badge-source">Microsoft Learn</span>
+          </div>
+
+          <div class="question-body">
+            <h2 id="question-text" class="question-prompt">Loading question...</h2>
+            
+            <div id="options-container" class="options-group">
+              <!-- Dynamically populated options -->
+            </div>
+          </div>
+
+          <!-- Instant Feedback / Explanation Box (Shown if enabled or revealed) -->
+          <div id="explanation-box" class="explanation-box hidden">
+            <div class="explanation-header">
+              <span id="explanation-status" class="expl-verdict">Correct!</span>
+              <span class="expl-source">Reference: <strong id="expl-source-name">GitHub Docs</strong></span>
+            </div>
+            <p id="explanation-text" class="expl-body"></p>
+          </div>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <div class="quiz-footer">
+          <button id="btn-prev-question" class="btn-secondary" disabled>
+            ← Previous
+          </button>
+          <div class="footer-center">
+            <button id="btn-clear-selection" class="btn-link">Clear Selection</button>
+          </div>
+          <div class="footer-right">
+            <button id="btn-next-question" class="btn-primary">
+              Next →
+            </button>
+            <button id="btn-submit-exam" class="btn-success hidden">
+              Submit Exam 🏁
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 4: RESULTS & REVIEW SCREEN -->
+      <section id="screen-results" class="screen">
+        <div class="results-card">
+          <div id="result-badge-banner" class="result-banner pass">
+            <div class="result-icon" id="result-icon">🎉</div>
+            <h2 id="result-title">Congratulations! You Passed!</h2>
+            <p id="result-subtitle">You met the 70% passing threshold for the GitHub Foundations exam.</p>
+          </div>
+
+          <div class="score-summary-grid">
+            <div class="score-stat-box">
+              <span class="stat-label">Your Score</span>
+              <span class="stat-huge" id="stat-score-percent">86%</span>
+              <span class="stat-sub" id="stat-score-fractions">65 / 75 correct</span>
+            </div>
+            <div class="score-stat-box">
+              <span class="stat-label">Required Score</span>
+              <span class="stat-huge">70%</span>
+              <span class="stat-sub">Official Passing Line</span>
+            </div>
+            <div class="score-stat-box">
+              <span class="stat-label">Time Taken</span>
+              <span class="stat-huge" id="stat-time-spent">42:15</span>
+              <span class="stat-sub">120 mins allowed</span>
+            </div>
+            <div class="score-stat-box">
+              <span class="stat-label">Flagged Items</span>
+              <span class="stat-huge" id="stat-flagged-count">4</span>
+              <span class="stat-sub">Reviewed</span>
+            </div>
+          </div>
+
+          <!-- Domain Performance Breakdown -->
+          <div class="domain-breakdown-section">
+            <h3>📈 Domain Performance Analysis</h3>
+            <div id="domain-score-bars" class="domain-bars-container">
+              <!-- Dynamically populated domain bars -->
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="results-actions-row">
+            <button id="btn-review-questions" class="btn-primary">Review Answers & Explanations</button>
+            <button id="btn-retake-rotated" class="btn-secondary">🔄 Retake New Rotated Exam</button>
+            <button id="btn-back-dashboard-end" class="btn-outline">Return to Dashboard</button>
+          </div>
+        </div>
+
+        <!-- Question Review Container (Expandable) -->
+        <div id="review-section" class="review-section hidden">
+          <div class="review-filter-bar">
+            <h3>Detailed Review</h3>
+            <div class="filter-pills">
+              <button class="filter-pill active" data-filter="all">All (<span id="filter-count-all">0</span>)</button>
+              <button class="filter-pill" data-filter="incorrect">Incorrect Only (<span id="filter-count-incorrect">0</span>)</button>
+              <button class="filter-pill" data-filter="flagged">Flagged (<span id="filter-count-flagged">0</span>)</button>
+            </div>
+          </div>
+          <div id="review-list-items" class="review-items-container">
+            <!-- Dynamically populated review cards -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 5: STUDY HUB & VISUAL GUIDE -->
+      <section id="screen-study" class="screen">
+        <div class="study-hero">
+          <div class="hero-tag">Certified Reference & Complete Theory</div>
+          <h2>GitHub Foundations Theory & Study Hub</h2>
+          <p>Comprehensive conceptual curriculum synthesized from Microsoft Learn GH-900, DataCamp Git & GitHub courses, and official GitHub documentation.</p>
+        </div>
+
+        <!-- Study Sub-Navigation Tabs -->
+        <div class="study-nav-bar">
+          <button class="study-subtab active" data-subtab="theory-concepts">Theory & Concepts</button>
+          <button class="study-subtab" data-subtab="git-commands">Git CLI Reference</button>
+          <button class="study-subtab" data-subtab="gh-cli">GitHub CLI (gh)</button>
+          <button class="study-subtab" data-subtab="visual-diagrams">Architecture Diagrams</button>
+          <button class="study-subtab" data-subtab="repo-files">Repository Files</button>
+        </div>
+
+        <!-- SUBTAB 0: EXAM THEORY & CONCEPTS -->
+        <div id="subtab-pane-theory-concepts" class="study-pane active">
+          <div class="pane-controls-row">
+            <div class="search-input-wrapper">
+              <input type="text" id="input-search-theory" placeholder="Search concepts (e.g. fast-forward, EMU, CodeQL, Actions, branch protection)..." />
+            </div>
+            <div class="category-pills" id="theory-domain-pills">
+              <button class="filter-pill active" data-domain="all">All Domains</button>
+              <button class="filter-pill" data-domain="Domain 1">Domain 1: Git & GitHub</button>
+              <button class="filter-pill" data-domain="Domain 2">Domain 2: Repositories</button>
+              <button class="filter-pill" data-domain="Domain 3">Domain 3: Collaboration</button>
+              <button class="filter-pill" data-domain="Domain 4">Domain 4: Security</button>
+              <button class="filter-pill" data-domain="Domain 5">Domain 5: Actions</button>
+              <button class="filter-pill" data-domain="Domain 6">Domain 6: Modern Tooling</button>
+            </div>
+          </div>
+          <div id="theory-modules-container" class="theory-modules-list">
+            <!-- Dynamically populated from theoryData.js -->
+          </div>
+        </div>
+
+        <!-- SUBTAB 1: GIT COMMANDS -->
+        <div id="subtab-pane-git-commands" class="study-pane">
+          <div class="pane-controls-row">
+            <div class="search-input-wrapper">
+              <input type="text" id="input-search-git" placeholder="Search Git commands (e.g. status, merge, commit)..." />
+            </div>
+            <div class="category-pills" id="git-category-pills">
+              <button class="filter-pill active" data-cat="all">All</button>
+              <button class="filter-pill" data-cat="Everyday Workflow">Everyday Workflow</button>
+              <button class="filter-pill" data-cat="Branching & Switching">Branching & Switching</button>
+              <button class="filter-pill" data-cat="Remotes & Synchronization">Remotes & Sync</button>
+              <button class="filter-pill" data-cat="Undoing & Temporary Work">Undoing & Stash</button>
+            </div>
+          </div>
+          <div id="git-commands-grid" class="commands-grid">
+            <!-- Dynamically populated from studyData.js -->
+          </div>
+        </div>
+
+        <!-- SUBTAB 2: GITHUB CLI (GH) -->
+        <div id="subtab-pane-gh-cli" class="study-pane">
+          <div class="pane-intro">
+            <h3>GitHub CLI (<code>gh</code>) Command Reference</h3>
+            <p>The official GitHub command-line interface enables you to manage Pull Requests, Issues, Repositories, and Actions directly from your terminal.</p>
+          </div>
+          <div id="gh-commands-grid" class="commands-grid">
+            <!-- Dynamically populated from studyData.js -->
+          </div>
+        </div>
+
+        <!-- SUBTAB 3: VISUAL ARCHITECTURE DIAGRAMS -->
+        <div id="subtab-pane-visual-diagrams" class="study-pane">
+          <div class="diagrams-grid">
+            
+            <!-- Diagram 1: Git 3 Trees / Architecture -->
+            <div class="diagram-card">
+              <div class="diagram-header">
+                <span class="diagram-num">1</span>
+                <div>
+                  <h3>Git 3-Stage Pipeline (Working Tree → Staging → Local Repo → Remote)</h3>
+                  <p>Understanding how files move through Git's lifecycle is the #1 tested concept on the exam.</p>
+                </div>
+              </div>
+              <div class="visual-pipeline">
+                <div class="pipe-box working">
+                  <span class="box-tag">Workspace</span>
+                  <h4>Working Directory</h4>
+                  <p>Modified & untracked files on your disk</p>
+                  <span class="cmd-label">`git status`</span>
+                </div>
+                <div class="pipe-arrow">
+                  <span class="arrow-cmd">git add &gt;</span>
+                  <div class="arrow-line"></div>
+                </div>
+                <div class="pipe-box staging">
+                  <span class="box-tag">Index</span>
+                  <h4>Staging Area</h4>
+                  <p>Snapshot prepared for commit</p>
+                  <span class="cmd-label">`git diff --staged`</span>
+                </div>
+                <div class="pipe-arrow">
+                  <span class="arrow-cmd">git commit &gt;</span>
+                  <div class="arrow-line"></div>
+                </div>
+                <div class="pipe-box local">
+                  <span class="box-tag">Local</span>
+                  <h4>Repository (.git)</h4>
+                  <p>Committed history & commits with SHA hashes</p>
+                  <span class="cmd-label">`git log`</span>
+                </div>
+                <div class="pipe-arrow">
+                  <span class="arrow-cmd">git push &gt;</span>
+                  <div class="arrow-line"></div>
+                </div>
+                <div class="pipe-box remote">
+                  <span class="box-tag">Remote</span>
+                  <h4>GitHub (origin)</h4>
+                  <p>Cloud repository on GitHub.com</p>
+                  <span class="cmd-label">`git fetch / git pull`</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diagram 2: GitHub Flow Lifecycle -->
+            <div class="diagram-card">
+              <div class="diagram-header">
+                <span class="diagram-num">2</span>
+                <div>
+                  <h3>The GitHub Flow Collaboration Lifecycle</h3>
+                  <p>The standard branch-based workflow recommended by GitHub for continuous delivery.</p>
+                </div>
+              </div>
+              <div class="flow-steps-row">
+                <div class="flow-step">
+                  <div class="step-badge">Step 1</div>
+                  <h4>Create Branch</h4>
+                  <p>Branch off <code>main</code> with a descriptive name (e.g., <code>feature/login</code>)</p>
+                  <code class="mini-code">git switch -c feat/xyz</code>
+                </div>
+                <div class="flow-step">
+                  <div class="step-badge">Step 2</div>
+                  <h4>Make Commits</h4>
+                  <p>Add and commit logical, self-contained snapshots of code</p>
+                  <code class="mini-code">git commit -m "..."</code>
+                </div>
+                <div class="flow-step">
+                  <div class="step-badge">Step 3</div>
+                  <h4>Open Pull Request</h4>
+                  <p>Initiate discussion, run automated Actions CI tests, request reviews</p>
+                  <code class="mini-code">gh pr create</code>
+                </div>
+                <div class="flow-step">
+                  <div class="step-badge">Step 4</div>
+                  <h4>Review & Discuss</h4>
+                  <p>Peers leave comments, approve, or suggest inline changes</p>
+                  <code class="mini-code">CODEOWNERS</code>
+                </div>
+                <div class="flow-step">
+                  <div class="step-badge">Step 5</div>
+                  <h4>Merge & Deploy</h4>
+                  <p>Merge into <code>main</code>; branch auto-deleted and changes deployed</p>
+                  <code class="mini-code">Closes #42</code>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diagram 3: GitHub Security Ecosystem -->
+            <div class="diagram-card">
+              <div class="diagram-header">
+                <span class="diagram-num">3</span>
+                <div>
+                  <h3>GitHub Security Triple Shield</h3>
+                  <p>How GitHub protects code, dependencies, and credentials across the supply chain.</p>
+                </div>
+              </div>
+              <div class="security-trio-grid">
+                <div class="trio-card dependabot">
+                  <span class="box-tag">Dependencies</span>
+                  <h4>Dependabot</h4>
+                  <ul>
+                    <li><strong>Alerts:</strong> Scans dependency graph for CVE vulnerabilities</li>
+                    <li><strong>Security Updates:</strong> Automatically opens PRs to patch known CVEs</li>
+                    <li><strong>Version Updates:</strong> Keeps libraries up-to-date via <code>dependabot.yml</code></li>
+                  </ul>
+                </div>
+                <div class="trio-card secret-scan">
+                  <span class="box-tag">Credentials</span>
+                  <h4>Secret Scanning</h4>
+                  <ul>
+                    <li><strong>Alerts:</strong> Identifies leaked API tokens & keys across repos</li>
+                    <li><strong>Push Protection:</strong> Actively blocks commits containing secrets on <code>git push</code></li>
+                    <li><strong>Partner Program:</strong> Immediately revokes compromised partner tokens</li>
+                  </ul>
+                </div>
+                <div class="trio-card codeql">
+                  <span class="box-tag">Code Analysis</span>
+                  <h4>CodeQL Code Scanning</h4>
+                  <ul>
+                    <li><strong>SAST Engine:</strong> Treats code as a database to find semantic bugs</li>
+                    <li><strong>Data Flow Analysis:</strong> Traces tainted user inputs to vulnerable sinks</li>
+                    <li><strong>Automated Gating:</strong> Blocks pull requests if new security flaws are introduced</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diagram 4: GitHub Actions Architecture -->
+            <div class="diagram-card">
+              <div class="diagram-header">
+                <span class="diagram-num">4</span>
+                <div>
+                  <h3>GitHub Actions Workflow Architecture</h3>
+                  <p>Event triggers, runners, parallel jobs, and artifact persistence.</p>
+                </div>
+              </div>
+              <div class="actions-anatomy">
+                <div class="anatomy-block event">
+                  <span class="block-tag">Triggers (`on:`)</span>
+                  <h4>Events</h4>
+                  <p>push, pull_request, workflow_dispatch, schedule (cron)</p>
+                </div>
+                <div class="pipe-arrow">➔</div>
+                <div class="anatomy-block workflow">
+                  <span class="block-tag">.github/workflows/*.yml</span>
+                  <h4>Workflow Runner</h4>
+                  <p>GitHub-hosted (ubuntu, windows, macos) OR Self-hosted</p>
+                </div>
+                <div class="pipe-arrow">➔</div>
+                <div class="anatomy-block jobs">
+                  <span class="block-tag">Parallel by default</span>
+                  <h4>Jobs & Steps</h4>
+                  <p>Runs sequentially inside jobs: uses actions (e.g. `checkout@v4`) or `run:` scripts</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SUBTAB 4: REPOSITORY FILES -->
+        <div id="subtab-pane-repo-files" class="study-pane">
+          <div class="pane-intro">
+            <h3>Standard Repository Files & Locations</h3>
+            <p>Files recognized automatically by GitHub to enforce governance, licensing, contributing, and security policies.</p>
+          </div>
+          <div id="repo-files-grid" class="repo-files-grid">
+            <!-- Dynamically populated from studyData.js -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- SCREEN 6: TERMINAL LAB (DATACAMP-STYLE HANDS-ON SIMULATOR) -->
+      <section id="screen-lab" class="screen">
+        <div class="lab-layout">
+          
+          <!-- LEFT PANEL: LESSON INSTRUCTIONS & TASKS -->
+          <div class="lab-sidebar">
+            <div class="lab-sidebar-header">
+              <label for="select-lab-lesson" class="lab-select-label">CHOOSE TOPIC / LAB:</label>
+              <select id="select-lab-lesson" class="lab-select-dropdown">
+                <!-- Dynamically populated from labLessons.js -->
+              </select>
+            </div>
+
+            <div class="lesson-details">
+              <div class="lab-cat-row">
+                <span id="lab-lesson-cat" class="lab-cat-pill">Git Fundamentals</span>
+                <span class="badge-cert">Interactive Lab</span>
+              </div>
+              <h3 id="lab-lesson-title">Loading topic...</h3>
+              <p id="lab-lesson-desc" class="lab-desc"></p>
+
+              <div class="lab-tasks-box">
+                <h4>TASKS TO COMPLETE</h4>
+                <ul id="lab-tasks-list" class="lab-tasks-list">
+                  <!-- Dynamically populated tasks -->
+                </ul>
+              </div>
+
+              <!-- HINT & SOLUTION ROW -->
+              <div class="lab-help-row">
+                <button id="btn-lab-hint" class="btn-outline btn-compact">Need Hint (<span id="lab-hint-count">0/2</span>)</button>
+                <button id="btn-lab-solution" class="btn-link">Show Solution</button>
+              </div>
+              <div id="lab-hint-box" class="lab-hint-box hidden"></div>
+              <div id="lab-solution-box" class="lab-solution-box hidden">
+                <div class="solution-header">
+                  <strong>Solution Commands:</strong>
+                  <button id="btn-paste-solution" class="btn-copy-cmd">Paste to Terminal</button>
+                </div>
+                <pre id="lab-solution-code"><code></code></pre>
+              </div>
+
+              <!-- VALIDATION / GRADING STATUS -->
+              <div id="lab-feedback-box" class="lab-feedback-box hidden"></div>
+
+              <!-- ACTION BUTTONS -->
+              <div class="lab-actions-footer">
+                <button id="btn-check-task" class="btn-primary btn-block">Check Work</button>
+                <div class="lab-footer-subactions">
+                  <button id="btn-reset-sandbox" class="btn-outline btn-compact" title="Reset current environment">Reset Environment</button>
+                  <button id="btn-next-lesson" class="btn-primary btn-compact hidden">Next Topic</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT PANEL: INTERACTIVE TERMINAL -->
+          <div class="lab-terminal-container">
+            <div class="terminal-window">
+              <div class="terminal-titlebar">
+                <div class="terminal-dots">
+                  <span class="dot-term red"></span>
+                  <span class="dot-term yellow"></span>
+                  <span class="dot-term green"></span>
+                </div>
+                <div id="terminal-title" class="terminal-title">bash — user@github-sandbox: ~/project (main)</div>
+                <div class="terminal-controls">
+                  <button id="btn-toggle-expand" class="btn-term-action" title="Toggle Full Width Terminal">Expand</button>
+                  <button id="btn-clear-term" class="btn-term-action" title="Clear screen">Clear</button>
+                </div>
+              </div>
+
+              <!-- Embedded Nano Text Editor Mode -->
+              <div id="nano-editor-view" class="nano-editor hidden">
+                <div class="nano-titlebar">
+                  <span class="nano-brand">GNU nano 6.2</span>
+                  <span id="nano-filename" class="nano-file">file.txt</span>
+                  <span id="nano-modified" class="nano-mod">Modified</span>
+                </div>
+                <textarea id="nano-textarea" class="nano-textarea" spellcheck="false"></textarea>
+                <div class="nano-statusbar" id="nano-status-msg">File opened in nano. Edit text and click Save &amp; Exit.</div>
+                <div class="nano-actions-bar">
+                  <div class="nano-shortcuts">
+                    <span><kbd>^O</kbd> WriteOut</span>
+                    <span><kbd>^X</kbd> Exit</span>
+                  </div>
+                  <div class="nano-buttons">
+                    <button id="btn-nano-save" class="btn-nano-action primary">Save &amp; Exit</button>
+                    <button id="btn-nano-cancel" class="btn-nano-action">Cancel</button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="terminal-body" class="terminal-body">
+                <div class="terminal-banner">
+                  <span class="term-brand">GitHub Foundations Terminal Sandbox</span> — v1.2.0
+                  <br>Type <span class="term-cyan">help</span> for available Linux &amp; Git commands.
+                </div>
+                <div id="terminal-output" class="terminal-output"></div>
+                <div class="terminal-input-row">
+                  <span id="terminal-prompt" class="terminal-prompt">user@github-sandbox:~/project (main)$ </span>
+                  <input type="text" id="terminal-input" class="terminal-input" autocomplete="off" spellcheck="false" autofocus />
+                </div>
+              </div>
+
+              <!-- Quick Command Chips for Fast Clicking -->
+              <div class="terminal-quick-chips">
+                <span class="chip-label">Quick Run:</span>
+                <button class="quick-chip" data-cmd="git status">git status</button>
+                <button class="quick-chip" data-cmd="git log --oneline">git log</button>
+                <button class="quick-chip" data-cmd="git branch">git branch</button>
+                <button class="quick-chip" data-cmd="git remote -v">git remote -v</button>
+                <button class="quick-chip" data-cmd="ls -la">ls -la</button>
+                <button class="quick-chip" data-cmd="clear">clear</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- APPLICATION FOOTER (GitHub Primer Web App Style) -->
+    <footer class="app-footer">
+      <div class="footer-container">
+        <div class="footer-brand-section">
+          <div class="footer-brand-row">
+            <svg class="footer-octocat" height="26" viewBox="0 0 16 16" width="26" fill="currentColor">
+              <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+            </svg>
+            <div class="footer-brand-text">
+              <strong>GitHub Foundations (GH-900)</strong>
+              <span class="footer-tagline">Interactive Certification Prep &amp; Simulator</span>
+            </div>
+          </div>
+          <p class="footer-desc">
+            Complete exam simulator with 115+ official-style questions, hands-on simulated Bash/Git terminal sandbox, and comprehensive theory synthesized from Microsoft Learn GH-900 and GitHub Docs.
+          </p>
+          <div class="footer-version-tag">
+            <span class="status-indicator"></span> Platform v2.5.0 • Created by N3k0sint
+          </div>
+        </div>
+
+        <div class="footer-links-grid">
+          <div class="footer-col">
+            <h4>Practice Exam</h4>
+            <ul>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-full">Full Simulation (75 Qs)</button></li>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-ms">Microsoft Style (50 Qs)</button></li>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-sprint">Quick Sprint (20 Qs)</button></li>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-tf">True / False Mastery</button></li>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-custom">Topic Drill by Domain</button></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Study Hub</h4>
+            <ul>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-theory">6 Official GH-900 Domains</button></li>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-git-cli">Git CLI Reference</button></li>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-gh-cli">GitHub CLI (gh) Manual</button></li>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-arch">Architecture Diagrams</button></li>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-repo-files">Repository Files Guide</button></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Terminal Lab</h4>
+            <ul>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-lab-0">1. Git Init &amp; First Commit</button></li>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-lab-1">2. Branching &amp; Fast-Forward</button></li>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-lab-2">3. Modifying History &amp; Amend</button></li>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-lab-3">4. Remote Tracking &amp; Push</button></li>
+              <li><button type="button" class="footer-link-btn" id="footer-btn-lab-4">5. Merge Conflict Resolution</button></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Official Docs</h4>
+            <ul>
+              <li><a href="https://learn.microsoft.com/en-us/credentials/certifications/github-foundations/" target="_blank" rel="noopener">MS Learn GH-900 Outline ↗</a></li>
+              <li><a href="https://docs.github.com/en" target="_blank" rel="noopener">GitHub Official Docs ↗</a></li>
+              <li><a href="https://cli.github.com/manual/" target="_blank" rel="noopener">GitHub CLI Reference ↗</a></li>
+              <li><a href="https://git-scm.com/doc" target="_blank" rel="noopener">Git SCM Documentation ↗</a></li>
+              <li><a href="https://github.com/skills" target="_blank" rel="noopener">GitHub Skills Labs ↗</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="footer-legal">
+          <p>© 2026 GitHub Foundations Prep Platform. Developed by <strong>N3k0sint</strong> for developers preparing for certified GitHub accreditation.</p>
+          <p class="disclaimer-text">Independent open educational platform. GitHub, the GitHub logo, and Microsoft are trademarks of their respective owners.</p>
+        </div>
+        <div class="footer-meta-pill">
+          <span>115 Questions</span>
+          <span class="sep">•</span>
+          <span>6 Domains</span>
+          <span class="sep">•</span>
+          <span>5 Terminal Labs</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Slide-in Question Navigator Drawer -->
+    <div id="drawer-navigator" class="nav-drawer">
+      <div class="drawer-header">
+        <h3>Question Navigator</h3>
+        <button id="btn-close-drawer" class="btn-icon">✕</button>
+      </div>
+      <div class="drawer-legend">
+        <span class="legend-item"><span class="dot answered"></span> Answered</span>
+        <span class="legend-item"><span class="dot current"></span> Current</span>
+        <span class="legend-item"><span class="dot flagged"></span> Flagged</span>
+        <span class="legend-item"><span class="dot unvisited"></span> Unanswered</span>
+      </div>
+      <div id="drawer-grid" class="drawer-grid">
+        <!-- Dynamically populated question numbers -->
+      </div>
+      <div class="drawer-footer">
+        <button id="btn-drawer-submit" class="btn-danger btn-block">End & Submit Exam</button>
+      </div>
+    </div>
+    <div id="drawer-overlay" class="drawer-overlay"></div>
+
+  </div>
+
+  <!-- Main Application Script (ES Module) -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
