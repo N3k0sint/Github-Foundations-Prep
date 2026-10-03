@@ -235,6 +235,56 @@ export class VirtualTerminal {
     return matches;
   }
 
+  // Helper to resolve relative/absolute path to { parentDir, name, item, fullPath }
+  resolvePath(pathStr) {
+    if (!pathStr) return null;
+    let target = pathStr.trim();
+    if (target.startsWith('~/project')) {
+      target = target.replace('~/project', '/home/user/project');
+    } else if (target === '~' || target.startsWith('~/')) {
+      target = target.replace('~', '/home/user/project');
+    }
+
+    let absPath;
+    if (target.startsWith('/home/user/project')) {
+      absPath = target;
+    } else {
+      absPath = `${this.cwd}/${target}`;
+    }
+
+    const segments = absPath.split('/').filter(Boolean);
+    const resolved = [];
+    for (const seg of segments) {
+      if (seg === '.') continue;
+      if (seg === '..') {
+        if (resolved.length > 3) {
+          resolved.pop();
+        }
+      } else {
+        resolved.push(seg);
+      }
+    }
+
+    const normPath = '/' + resolved.join('/');
+    const name = resolved[resolved.length - 1];
+    if (!name) return null;
+
+    // Navigate to parent directory
+    const parts = resolved.slice(3, -1);
+    let curr = { children: this.getProjectDir() };
+    for (const p of parts) {
+      if (curr.children && curr.children[p] && curr.children[p].type === 'dir') {
+        curr = curr.children[p];
+      } else {
+        return null;
+      }
+    }
+
+    const parentDir = curr.children;
+    const item = parentDir ? parentDir[name] : undefined;
+    return { parentDir, name, item, fullPath: normPath };
+  }
+
   // Linux command: cd
   cmdCd(args) {
     const target = args[0] || '~';
@@ -242,29 +292,77 @@ export class VirtualTerminal {
       this.cwd = '/home/user/project';
       return '';
     }
-    if (target === '..' || target === '../') {
-      if (this.cwd !== '/home/user/project') {
-        this.cwd = '/home/user/project';
+
+    let absPath;
+    if (target.startsWith('~/project')) {
+      absPath = target.replace('~/project', '/home/user/project');
+    } else if (target.startsWith('~')) {
+      absPath = '/home/user/project';
+    } else if (target.startsWith('/home/user/project')) {
+      absPath = target;
+    } else {
+      absPath = `${this.cwd}/${target}`;
+    }
+
+    const segments = absPath.split('/').filter(Boolean);
+    const resolved = [];
+    for (const seg of segments) {
+      if (seg === '.') continue;
+      if (seg === '..') {
+        if (resolved.length > 3) {
+          resolved.pop();
+        }
+      } else {
+        resolved.push(seg);
       }
+    }
+
+    const newCwd = '/' + resolved.join('/');
+    if (newCwd === '/home/user/project') {
+      this.cwd = newCwd;
       return '';
     }
-    // Navigate into a subdirectory from current cwd
-    const dir = this.getCwdDir();
-    if (dir[target] && dir[target].type === 'dir') {
-      this.cwd = `${this.cwd}/${target}`;
-      return '';
+
+    const parts = resolved.slice(3);
+    let curr = { children: this.getProjectDir() };
+    for (const part of parts) {
+      if (curr.children && curr.children[part] && curr.children[part].type === 'dir') {
+        curr = curr.children[part];
+      } else {
+        return `bash: cd: ${target}: No such file or directory`;
+      }
     }
-    return `bash: cd: ${target}: No such file or directory`;
+
+    this.cwd = newCwd;
+    return '';
   }
 
   // Linux command: ls
   cmdLs(args) {
-    const dir = this.getCwdDir();  // ← uses real cwd, not hardcoded root
     const showAll = args.includes('-a') || args.includes('-la') || args.includes('-al');
     const isLong = args.includes('-l') || args.includes('-la') || args.includes('-al');
+    const pathArg = args.find(a => !a.startsWith('-'));
+
+    let dir = this.getCwdDir();
+    let isRoot = this.cwd === '/home/user/project';
+
+    if (pathArg) {
+      const res = this.resolvePath(pathArg);
+      if (!res || (!res.item && pathArg !== '.')) {
+        return `ls: cannot access '${pathArg}': No such file or directory`;
+      }
+      if (res.item && res.item.type === 'file') {
+        return pathArg;
+      }
+      if (res.item && res.item.type === 'dir') {
+        dir = res.item.children || {};
+        isRoot = res.fullPath === '/home/user/project';
+      }
+    }
+
     let names = Object.keys(dir);
 
-    if (this.git.isRepo && showAll && this.cwd === '/home/user/project') {
+    if (this.git.isRepo && showAll && isRoot) {
       names.push('.git');
     }
 
@@ -294,20 +392,21 @@ export class VirtualTerminal {
   // Linux command: cat
   cmdCat(args) {
     if (!args[0]) return "cat: missing file operand";
-    const dir = this.getCwdDir();
-    const file = dir[args[0]];
-    if (!file) return `cat: ${args[0]}: No such file or directory`;
-    if (file.type === 'dir') return `cat: ${args[0]}: Is a directory`;
-    return file.content;
+    const res = this.resolvePath(args[0]);
+    if (!res || !res.item) return `cat: ${args[0]}: No such file or directory`;
+    if (res.item.type === 'dir') return `cat: ${args[0]}: Is a directory`;
+    return res.item.content;
   }
 
   // Linux command: touch
   cmdTouch(args) {
     if (!args[0]) return "touch: missing file operand";
-    const dir = this.getCwdDir();
     args.forEach(f => {
-      if (!dir[f]) {
-        dir[f] = { type: 'file', content: '' };
+      const res = this.resolvePath(f);
+      if (res && res.parentDir) {
+        if (!res.parentDir[res.name]) {
+          res.parentDir[res.name] = { type: 'file', content: '' };
+        }
       }
     });
     return "";
@@ -316,10 +415,10 @@ export class VirtualTerminal {
   // Linux command: nano
   cmdNano(args) {
     const filename = args[0] || 'untitled.txt';
-    const dir = this.getProjectDir();
+    const res = this.resolvePath(filename);
     let content = '';
-    if (dir[filename] && dir[filename].type === 'file') {
-      content = dir[filename].content;
+    if (res && res.item && res.item.type === 'file') {
+      content = res.item.content;
     }
     return {
       nano: true,
@@ -330,32 +429,38 @@ export class VirtualTerminal {
 
   // Save content from nano editor
   saveNanoFile(filename, content) {
-    const dir = this.getProjectDir();
-    dir[filename] = { type: 'file', content };
+    const res = this.resolvePath(filename);
+    if (res && res.parentDir) {
+      res.parentDir[res.name] = { type: 'file', content };
+    } else {
+      const dir = this.getCwdDir();
+      dir[filename] = { type: 'file', content };
+    }
     return `[ Wrote ${content.split('\n').length} lines to ${filename} ]`;
   }
 
   // Linux command: mkdir
   cmdMkdir(args) {
     if (!args[0]) return "mkdir: missing operand";
-    const dir = this.getCwdDir();
-    if (dir[args[0]]) return `mkdir: cannot create directory '${args[0]}': File exists`;
-    dir[args[0]] = { type: 'dir', children: {} };
+    const res = this.resolvePath(args[0]);
+    if (!res || !res.parentDir) return `mkdir: cannot create directory '${args[0]}': No such file or directory`;
+    if (res.parentDir[res.name]) return `mkdir: cannot create directory '${args[0]}': File exists`;
+    res.parentDir[res.name] = { type: 'dir', children: {} };
     return "";
   }
 
   // Linux command: rm
   cmdRm(args) {
     if (!args[0]) return "rm: missing operand";
-    const dir = this.getCwdDir();
     const isRecursive = args.includes('-r') || args.includes('-rf');
     const target = args.find(a => !a.startsWith('-'));
     if (!target) return "rm: missing operand";
-    if (!dir[target]) return `rm: cannot remove '${target}': No such file or directory`;
-    if (dir[target].type === 'dir' && !isRecursive) {
+    const res = this.resolvePath(target);
+    if (!res || !res.item) return `rm: cannot remove '${target}': No such file or directory`;
+    if (res.item.type === 'dir' && !isRecursive) {
       return `rm: cannot remove '${target}': Is a directory`;
     }
-    delete dir[target];
+    delete res.parentDir[res.name];
     return "";
   }
 
@@ -363,21 +468,28 @@ export class VirtualTerminal {
   cmdEcho(args) {
     const arrowIdx = args.indexOf('>');
     const appendIdx = args.indexOf('>>');
-    const dir = this.getProjectDir();
 
     if (arrowIdx !== -1 && args[arrowIdx + 1]) {
       const text = args.slice(0, arrowIdx).join(' ');
       const target = args[arrowIdx + 1];
-      dir[target] = { type: 'file', content: text + '\n' };
-      return "";
+      const res = this.resolvePath(target);
+      if (res && res.parentDir) {
+        res.parentDir[res.name] = { type: 'file', content: text + '\n' };
+        return "";
+      }
+      return `bash: ${target}: No such file or directory`;
     }
 
     if (appendIdx !== -1 && args[appendIdx + 1]) {
       const text = args.slice(0, appendIdx).join(' ');
       const target = args[appendIdx + 1];
-      const existing = dir[target] ? dir[target].content : '';
-      dir[target] = { type: 'file', content: existing + text + '\n' };
-      return "";
+      const res = this.resolvePath(target);
+      if (res && res.parentDir) {
+        const existing = res.item ? res.item.content : '';
+        res.parentDir[res.name] = { type: 'file', content: existing + text + '\n' };
+        return "";
+      }
+      return `bash: ${target}: No such file or directory`;
     }
 
     return args.join(' ');
@@ -500,17 +612,32 @@ export class VirtualTerminal {
       lines.push("");
     }
 
-    // Untracked files & modified unstaged
+    // Untracked files & modified unstaged (supports subdirectories)
     const untracked = [];
     const modifiedUnstaged = [];
 
-    Object.keys(dir).forEach(f => {
-      if (f.startsWith('.')) return;
+    const collectTreeFiles = (d, prefix = '') => {
+      let result = {};
+      Object.entries(d).forEach(([name, item]) => {
+        if (name.startsWith('.')) return;
+        const full = prefix ? `${prefix}/${name}` : name;
+        if (item.type === 'file') {
+          result[full] = item.content;
+        } else if (item.type === 'dir' && item.children) {
+          Object.assign(result, collectTreeFiles(item.children, full));
+        }
+      });
+      return result;
+    };
+
+    const workTree = collectTreeFiles(dir);
+
+    Object.keys(workTree).forEach(f => {
       if (this.git.staging[f] !== undefined) return; // already staged
 
       if (!lastTree[f]) {
         untracked.push(f);
-      } else if (lastTree[f] !== dir[f].content) {
+      } else if (lastTree[f] !== workTree[f]) {
         modifiedUnstaged.push(f);
       }
     });
@@ -548,18 +675,33 @@ export class VirtualTerminal {
 
     const dir = this.getProjectDir();
 
-    if (args[0] === '.' || args[0] === '-A') {
-      Object.entries(dir).forEach(([name, item]) => {
-        if (!name.startsWith('.')) {
-          this.git.staging[name] = item.content;
+    const addFilesRecursively = (d, prefix = '') => {
+      Object.entries(d).forEach(([name, item]) => {
+        if (name.startsWith('.')) return;
+        const full = prefix ? `${prefix}/${name}` : name;
+        if (item.type === 'file') {
+          this.git.staging[full] = item.content;
+        } else if (item.type === 'dir' && item.children) {
+          addFilesRecursively(item.children, full);
         }
       });
+    };
+
+    if (args[0] === '.' || args[0] === '-A') {
+      addFilesRecursively(dir);
       return "";
     }
 
     let error = "";
     args.forEach(f => {
-      if (dir[f]) {
+      const res = this.resolvePath(f);
+      if (res && res.item && res.item.type === 'file') {
+        const repoRelPath = res.fullPath.replace('/home/user/project/', '');
+        this.git.staging[repoRelPath] = res.item.content;
+      } else if (res && res.item && res.item.type === 'dir') {
+        const repoRelPath = res.fullPath.replace('/home/user/project/', '');
+        addFilesRecursively(res.item.children || {}, repoRelPath);
+      } else if (dir[f] && dir[f].type === 'file') {
         this.git.staging[f] = dir[f].content;
       } else {
         error = `fatal: pathspec '${f}' did not match any files`;
