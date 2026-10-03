@@ -104,6 +104,27 @@ export class VirtualTerminal {
     return this.fs['/home/user/project'].children;
   }
 
+  // Returns the children object for the CURRENT working directory
+  getCwdDir() {
+    if (this.cwd === '/home/user/project') {
+      return this.getProjectDir();
+    }
+    // Handle one level deep: /home/user/project/<subdir>
+    const projectDir = this.getProjectDir();
+    const relative = this.cwd.replace('/home/user/project/', '');
+    const parts = relative.split('/').filter(Boolean);
+    let node = { children: projectDir };
+    for (const part of parts) {
+      if (node.children && node.children[part] && node.children[part].type === 'dir') {
+        node = node.children[part];
+      } else {
+        // Fallback to project root if path is broken
+        return this.getProjectDir();
+      }
+    }
+    return node.children || {};
+  }
+
   getPrompt() {
     const statePart = this.git.headState ? `|${this.git.headState}` : '';
     const branchInfo = this.git.isRepo ? ` (${this.git.head}${statePart})` : '';
@@ -116,8 +137,30 @@ export class VirtualTerminal {
     const raw = commandLine.trim();
     if (!raw) return '';
 
+    // Support command chaining: split on && or ; before processing
+    const chain = raw.split(/\s*(?:&&|;)\s*/).map(s => s.trim()).filter(Boolean);
+    if (chain.length > 1) {
+      // Store full chained command once in history
+      this.history.push(raw);
+      this.historyIndex = this.history.length;
+      const outputs = [];
+      for (const segment of chain) {
+        const result = this._executeSingle(segment);
+        if (result && result.clear) return result; // propagate clear
+        if (result !== undefined && result !== '') outputs.push(result);
+      }
+      return outputs.join('\n');
+    }
+
     this.history.push(raw);
     this.historyIndex = this.history.length;
+    return this._executeSingle(raw);
+  }
+
+  // Internal: execute a single (non-chained) command
+  _executeSingle(commandLine) {
+    const raw = commandLine.trim();
+    if (!raw) return '';
 
     const parts = this.parseArgs(raw);
     const cmd = parts[0];
@@ -205,9 +248,10 @@ export class VirtualTerminal {
       }
       return '';
     }
-    const dir = this.getProjectDir();
+    // Navigate into a subdirectory from current cwd
+    const dir = this.getCwdDir();
     if (dir[target] && dir[target].type === 'dir') {
-      this.cwd = `/home/user/project/${target}`;
+      this.cwd = `${this.cwd}/${target}`;
       return '';
     }
     return `bash: cd: ${target}: No such file or directory`;
@@ -215,12 +259,12 @@ export class VirtualTerminal {
 
   // Linux command: ls
   cmdLs(args) {
-    const dir = this.getProjectDir();
+    const dir = this.getCwdDir();  // ← uses real cwd, not hardcoded root
     const showAll = args.includes('-a') || args.includes('-la') || args.includes('-al');
     const isLong = args.includes('-l') || args.includes('-la') || args.includes('-al');
     let names = Object.keys(dir);
 
-    if (this.git.isRepo && showAll) {
+    if (this.git.isRepo && showAll && this.cwd === '/home/user/project') {
       names.push('.git');
     }
 
@@ -229,6 +273,8 @@ export class VirtualTerminal {
     }
 
     names.sort();
+
+    if (names.length === 0) return '';
 
     if (isLong) {
       const lines = [`total ${names.length * 4}`];
@@ -248,7 +294,7 @@ export class VirtualTerminal {
   // Linux command: cat
   cmdCat(args) {
     if (!args[0]) return "cat: missing file operand";
-    const dir = this.getProjectDir();
+    const dir = this.getCwdDir();
     const file = dir[args[0]];
     if (!file) return `cat: ${args[0]}: No such file or directory`;
     if (file.type === 'dir') return `cat: ${args[0]}: Is a directory`;
@@ -258,7 +304,7 @@ export class VirtualTerminal {
   // Linux command: touch
   cmdTouch(args) {
     if (!args[0]) return "touch: missing file operand";
-    const dir = this.getProjectDir();
+    const dir = this.getCwdDir();
     args.forEach(f => {
       if (!dir[f]) {
         dir[f] = { type: 'file', content: '' };
@@ -292,7 +338,7 @@ export class VirtualTerminal {
   // Linux command: mkdir
   cmdMkdir(args) {
     if (!args[0]) return "mkdir: missing operand";
-    const dir = this.getProjectDir();
+    const dir = this.getCwdDir();
     if (dir[args[0]]) return `mkdir: cannot create directory '${args[0]}': File exists`;
     dir[args[0]] = { type: 'dir', children: {} };
     return "";
@@ -301,7 +347,7 @@ export class VirtualTerminal {
   // Linux command: rm
   cmdRm(args) {
     if (!args[0]) return "rm: missing operand";
-    const dir = this.getProjectDir();
+    const dir = this.getCwdDir();
     const isRecursive = args.includes('-r') || args.includes('-rf');
     const target = args.find(a => !a.startsWith('-'));
     if (!target) return "rm: missing operand";
@@ -669,14 +715,28 @@ export class VirtualTerminal {
       return `Deleted branch ${target}.`;
     }
 
+    // FIX #2: git branch -f <name> (force-move branch pointer to current HEAD)
+    if (args[0] === '-f') {
+      const target = args[1];
+      if (!target) return "fatal: branch name required after -f";
+      const currentHash = this.git.branches[this.git.head] || null;
+      this.git.branches[target] = currentHash;
+      return `Branch '${target}' set to ${currentHash ? currentHash.substring(0, 7) : 'HEAD'}.`;
+    }
+
     // git branch <new-branch> (create branch)
+    // FIX #1: use current branch's commit hash, NOT getLatestCommit()
+    // getLatestCommit() returns the last item in the commits array which may
+    // belong to a different branch. this.git.branches[head] is always accurate.
     if (args.length > 0 && !args[0].startsWith('-')) {
       const newName = args[0];
       if (this.git.branches[newName]) {
         return `fatal: A branch named '${newName}' already exists.`;
       }
-      const latest = this.getLatestCommit();
-      this.git.branches[newName] = latest ? latest.hash : null;
+      // Use current HEAD's hash — guaranteed to be a valid commit or null only
+      // if we're on an unborn branch (no commits yet), which is valid Git behavior.
+      const currentHash = this.git.branches[this.git.head] || null;
+      this.git.branches[newName] = currentHash;
       return "";
     }
 
